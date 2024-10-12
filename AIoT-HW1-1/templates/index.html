@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Linear Regression</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">Interactive Linear Regression</h1>
+        
+        <form id="linear-regression-form">
+            <div class="form-group">
+                <label for="num_points">Number of Points (n)</label>
+                <input type="number" class="form-control" id="num_points" name="num_points" value="100" required>
+            </div>
+            <div class="form-group">
+                <label for="slope">Slope (a)</label>
+                <input type="number" step="0.1" class="form-control" id="slope" name="slope" value="3.0" required>
+            </div>
+            <div class="form-group">
+                <label for="noise">Noise Level (c)</label>
+                <input type="number" step="0.1" class="form-control" id="noise" name="noise" value="10.0" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Generate Plot</button>
+        </form>
+
+        <hr>
+
+        <h3>Results</h3>
+        <div id="results" style="display: none;">
+            <img id="regression_plot" src="" alt="Regression Plot" class="img-fluid">
+            <p><strong>Training MSE:</strong> <span id="mse_train"></span></p>
+            <p><strong>Test MSE:</strong> <span id="mse_test"></span></p>
+            <p><strong>Training R²:</strong> <span id="r2_train"></span></p>
+            <p><strong>Test R²:</strong> <span id="r2_test"></span></p>
+        </div>
+
+        <div id="error" class="alert alert-danger" style="display: none;"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#linear-regression-form').on('submit', function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/generate_plot',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#results').show();
+                        $('#regression_plot').attr('src', response.plot_url);  // Update the plot image
+                        $('#mse_train').text(response.mse_train);
+                        $('#mse_test').text(response.mse_test);
+                        $('#r2_train').text(response.r2_train);
+                        $('#r2_test').text(response.r2_test);
+                        $('#error').hide();  // Hide error message
+                    },
+                    error: function(response) {
+                        $('#error').text(response.responseJSON.error).show();  // Show error message
+                        $('#results').hide();  // Hide the results section
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
